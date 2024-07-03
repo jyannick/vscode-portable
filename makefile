@@ -11,7 +11,6 @@ run:
 
 install-extensions:
 	for extension in `cat extensions.txt` ; do \
-		echo $${extension} ; \
 		VSCode-linux-x64/bin/code --install-extension $${extension} ; \
 	done
 
