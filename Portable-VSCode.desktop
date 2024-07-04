@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=VSCode-Portable
+Comment=Portable version of Visual Studio Code with pre-installed extensions
+Exec=sh -c "\$HOME/.local/opt/Portable-VSCode-linux-x64/code"
+Icon=Portable-VSCode
+Terminal=false
+Categories=Development;

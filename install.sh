@@ -53,4 +53,11 @@ fi
 rmdir ~/.local/opt/Portable-VSCode-linux-x64/data/user-data/User
 ln -s ~/.config/Portable-VSCode/User ~/.local/opt/Portable-VSCode-linux-x64/data/user-data/ 
 
+echo "Creating menu entry"
+mkdir -p ~/.local/share/icons/hicolor/scalable/apps/
+cp ~/.local/opt/Portable-VSCode-linux-x64/vscode.svg ~/.local/share/icons/hicolor/scalable/apps/Portable-VSCode.svg
+desktop-file-install --dir=$HOME/.local/share/applications ~/.local/opt/Portable-VSCode-linux-x64/Portable-VSCode.desktop 
+update-desktop-database ~/.local/share/applications
+
 echo "Done. You can start Portable-VSCode by running ~/.local/bin/code"
+echo "You can also use the desktop menu entry. You might need to log out before it shows up."

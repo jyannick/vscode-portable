@@ -1,16 +1,29 @@
-# Portable VSCode packager
+# Portable Visual Studio Code packager
 
 [![Package](https://github.com/jyannick/vscode-portable/actions/workflows/package.yml/badge.svg)](https://github.com/jyannick/vscode-portable/actions/workflows/package.yml)
 
-Portable version of VSCode with a set of preinstalled extensions.
+Prepare a portable version of Visual Studio Code with a set of preinstalled extensions by just running a single command.
 
 See https://code.visualstudio.com/docs/editor/portable
 
-## How to install
+## How to build your custom version
+
+- clone this repository on a linux computer
+- add your favorite extensions in `extensions.txt`
+- run `make` to build the package
+- copy `Portable-VSCode-linux-x64.zip` where you want
+
+## Pre-built packages
+
+The github releases of this project contain ready-to-use packages with my favorite set of extensions.
+
+> [!IMPORTANT]
+> This is NOT an official VSCode release, it is simply a repackaging of VSCode for my personal use.
+
 
 ### Automated script
 
-Just paste this into a terminal:
+Just paste this into a terminal to install my latest pre-packaged release:
 
 ```bash
 curl -L https://github.com/jyannick/vscode-portable/releases/latest/download/install.sh | bash
@@ -25,8 +38,3 @@ curl -L https://github.com/jyannick/vscode-portable/releases/latest/download/ins
 - unzip
 - run `./bin/code`
 
-## How to build a custom version
-
-- add your favorite extensions in `extensions.txt`
-- run `make` to build the package
-- copy `Portable-VSCode-linux-x64.zip` where you want
