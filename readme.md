@@ -10,7 +10,14 @@ See https://code.visualstudio.com/docs/editor/portable
 
 ### Automated script
 
-`curl https://github.com/jyannick/vscode-portable/releases/latest/download/install.sh | bash`
+Just paste this into a terminal:
+
+```bash
+curl -L https://github.com/jyannick/vscode-portable/releases/latest/download/install.sh | bash
+```
+
+> [!CAUTION]
+> You should review [the installation script](https://github.com/jyannick/vscode-portable/releases/latest/download/install.sh) before running it. Use at your own risk.
 
 ### Manually
 
@@ -21,5 +28,5 @@ See https://code.visualstudio.com/docs/editor/portable
 ## How to build a custom version
 
 - add your favorite extensions in `extensions.txt`
-- `make`
+- run `make` to build the package
 - copy `Portable-VSCode-linux-x64.zip` where you want
