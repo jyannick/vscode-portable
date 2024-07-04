@@ -12,9 +12,7 @@ run:
 	VSCode-linux-x64/bin/code
 
 install-extensions:
-	for extension in `cat extensions.txt` ; do \
-		VSCode-linux-x64/bin/code --install-extension $${extension} ; \
-	done
+	VSCode-linux-x64/bin/code `cat extensions.txt | sed 's|^|--install-extension |g' | tr '\n' ' '`
 
 manifest:
 	echo "# Portable VSCode" > manifest.md
