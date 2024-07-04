@@ -8,6 +8,12 @@ See https://code.visualstudio.com/docs/editor/portable
 
 ## How to install
 
+### Automated script
+
+`curl https://github.com/jyannick/vscode-portable/releases/latest/download/install.sh | bash`
+
+### Manually
+
 - Download the [latest release](https://github.com/jyannick/vscode-portable/releases/latest)
 - unzip
 - run `./bin/code`
