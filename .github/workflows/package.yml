@@ -12,19 +12,13 @@ jobs:
 
       - name: Build package
         run: |
-          cd ${{ github.workspace }} && make all_but_package
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Portable-VSCode-linux-x64
-          path: ${{ github.workspace }}/VSCode-linux-x64
+          cd ${{ github.workspace }} && make
 
       - name: Create new release for ${{ github.ref }} 🚀
         uses: ncipollo/release-action@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          artifacts: ${{ github.workspace }}/VSCode-linux-x64
+          artifacts: ${{ github.workspace }}/Portable-VSCode-linux-x64.zip
           bodyFile: "manifest.md"
 
       - run: echo "💡 This job's status is ${{ job.status }}."
