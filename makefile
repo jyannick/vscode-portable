@@ -16,7 +16,7 @@ install-extensions:
 
 manifest:
 	echo "# Portable VSCode" > manifest.md
-	git describe --tags >> manifest.md
+	( git describe --tags || git show --oneline -s ) >> manifest.md
 	echo "## VSCode version" >> manifest.md
 	VSCode-linux-x64/bin/code -v | sed 's|^|* |g' >> manifest.md
 	echo "## Extensions" >> manifest.md
