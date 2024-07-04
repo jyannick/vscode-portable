@@ -1,3 +1,5 @@
+.DEFAULT_GOAL := all
+
 download:
 	wget "https://code.visualstudio.com/sha/download?build=stable&os=linux-x64" -O vscode.tar.gz
 
