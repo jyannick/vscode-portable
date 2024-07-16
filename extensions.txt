@@ -8,6 +8,5 @@ ms-vscode.makefile-tools
 charliermarsh.ruff
 esbenp.prettier-vscode
 mechatroner.rainbow-csv
-alefragnani.project-manager
 gruntfuggly.todo-tree
 evilz.vscode-reveal
