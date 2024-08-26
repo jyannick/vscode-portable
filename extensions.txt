@@ -1,5 +1,5 @@
 ms-python.python
-ms-vscode-remote.remote-containers
+ms-vscode-remote.vscode-remote-extensionpack
 mhutchie.git-graph
 Angular.ng-template
 ms-azuretools.vscode-docker
@@ -10,3 +10,14 @@ esbenp.prettier-vscode
 mechatroner.rainbow-csv
 gruntfuggly.todo-tree
 evilz.vscode-reveal
+asciidoctor.asciidoctor-vscode
+njpwerner.autodocstring	
+janisdd.vscode-edit-csv
+eamodio.gitlens
+ms-toolsai.jupyter
+ms-toolsai.jupyter-renderers
+alexcvzz.vscode-sqlite
+mtxr.sqltools
+tomoki1207.pdf
+redhat.vscode-xml
+johnpapa.Angular2
