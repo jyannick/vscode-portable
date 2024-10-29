@@ -10,6 +10,7 @@ eamodio.gitlens
 esbenp.prettier-vscode
 evilz.vscode-reveal
 fwcd.kotlin
+GrapeCity.gc-excelviewer
 gruntfuggly.todo-tree
 hbenl.vscode-test-explorer
 hediet.vscode-drawio
