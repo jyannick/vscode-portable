@@ -1,4 +1,5 @@
 alexcvzz.vscode-sqlite
+alexshenvscode.vscode-osu
 analytic-signal.preview-mp4
 Angular.ng-template
 asciidoctor.asciidoctor-vscode
