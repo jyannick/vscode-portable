@@ -9,6 +9,7 @@ dbaeumer.vscode-eslint
 eamodio.gitlens
 esbenp.prettier-vscode
 evilz.vscode-reveal
+franneck94.c-cpp-runner
 fwcd.kotlin
 GrapeCity.gc-excelviewer
 gruntfuggly.todo-tree
@@ -17,6 +18,7 @@ hediet.vscode-drawio
 janisdd.vscode-edit-csv
 jock.svg
 johnpapa.Angular2
+matepek.vscode-catch2-test-adapter
 mechatroner.rainbow-csv
 mhutchie.git-graph
 ms-azuretools.vscode-docker
