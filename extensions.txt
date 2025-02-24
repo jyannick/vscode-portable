@@ -16,6 +16,7 @@ gruntfuggly.todo-tree
 hbenl.vscode-test-explorer
 hediet.vscode-drawio
 janisdd.vscode-edit-csv
+jinxdash.prettier-rust
 jock.svg
 johnpapa.Angular2
 matepek.vscode-catch2-test-adapter
