@@ -11,6 +11,7 @@ esbenp.prettier-vscode
 evilz.vscode-reveal
 franneck94.c-cpp-runner
 fwcd.kotlin
+gitlab.gitlab-workflow
 GrapeCity.gc-excelviewer
 gruntfuggly.todo-tree
 hbenl.vscode-test-explorer
