@@ -53,6 +53,7 @@ Swellaby.vscode-rust-test-adapter
 tamasfe.even-better-toml
 tomoki1207.pdf
 twxs.cmake
+vadimcn.vscode-lldb
 VisualStudioExptTeam.intellicode-api-usage-examples
 VisualStudioExptTeam.vscodeintellicode
 vscjava.vscode-gradle
