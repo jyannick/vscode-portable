@@ -65,6 +65,7 @@ vadimcn.vscode-lldb
 esbenp.prettier-vscode
 jjjermiah.pixi-vscode
 ibm.output-colorizer
+mkhl.direnv
 
 # Docker
 ms-azuretools.vscode-docker
