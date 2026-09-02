@@ -1,0 +1,50 @@
+name: Create Tag
+run-name: Tagging a new ${{ inputs.bump }} release
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version part to bump
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to push the new tag
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      # Tags in this repo are plain "X.Y.Z" (no "v" prefix, no annotation -
+      # see e.g. "2.0.1"). Finds the highest existing one, bumps the chosen
+      # part, and pushes the result. Pushing a new tag triggers package.yml
+      # (on: [push]), which builds the package and, because the ref starts
+      # with refs/tags/, publishes it as a GitHub Release.
+      - name: Compute and push next version tag
+        run: |
+          latest=$(git tag -l | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -t. -k1,1n -k2,2n -k3,3n | tail -1)
+          latest="${latest:-0.0.0}"
+          IFS=. read -r major minor patch <<< "$latest"
+          case "${{ inputs.bump }}" in
+            major) major=$((major + 1)); minor=0; patch=0 ;;
+            minor) minor=$((minor + 1)); patch=0 ;;
+            patch) patch=$((patch + 1)) ;;
+          esac
+          next="$major.$minor.$patch"
+          if git rev-parse -q --verify "refs/tags/$next" >/dev/null; then
+            echo "Tag $next already exists - aborting." >&2
+            exit 1
+          fi
+          echo "Latest tag: $latest -> new tag: $next"
+          git tag "$next"
+          git push origin "$next"
+          echo "### Tagged $next :label:" >> "$GITHUB_STEP_SUMMARY"
