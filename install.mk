@@ -80,6 +80,7 @@ install-release: download-release
 	rmdir /tmp/Portable-VSCode-linux-x64
 	ln -s -f "$(INSTALL_DIR)/Portable-VSCode-linux-x64/bin/code" "$(BIN_DIR)/$(ALIAS)"
 	mkdir -p "$(CONFIG_DIR)/User"
+	mkdir -p "$(INSTALL_DIR)/Portable-VSCode-linux-x64/data/user-data"
 	rmdir "$(INSTALL_DIR)/Portable-VSCode-linux-x64/data/user-data/User" 2>/dev/null || true
 	ln -s -f "$(CONFIG_DIR)/User" "$(INSTALL_DIR)/Portable-VSCode-linux-x64/data/user-data/"
 	mkdir -p "$(HOME)/.local/share/icons/hicolor/scalable/apps"
