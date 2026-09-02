@@ -1,0 +1,83 @@
+name: Create Tag
+run-name: Tagging a new ${{ inputs.bump }} release
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version part to bump
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+jobs:
+  # A separate job so its computed version can be used elsewhere: a job's
+  # own `name:` can reference a prior job's outputs, unlike the workflow's
+  # top-level run-name above, which is fixed at trigger time (before any job
+  # runs) and can only see workflow_dispatch inputs - GitHub has no way to
+  # rename a run's title afterwards, so the version number can only show up
+  # as the *job* name (e.g. in the run's job list), not the run title.
+  compute-version:
+    runs-on: ubuntu-latest
+    outputs:
+      next: ${{ steps.compute.outputs.next }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      # Tags in this repo are plain "X.Y.Z" (no "v" prefix, no annotation -
+      # see e.g. "2.0.1"). Finds the highest existing one and bumps the
+      # chosen part.
+      - name: Compute next version
+        id: compute
+        run: |
+          latest=$(git tag -l | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -t. -k1,1n -k2,2n -k3,3n | tail -1)
+          latest="${latest:-0.0.0}"
+          IFS=. read -r major minor patch <<< "$latest"
+          case "${{ inputs.bump }}" in
+            major) major=$((major + 1)); minor=0; patch=0 ;;
+            minor) minor=$((minor + 1)); patch=0 ;;
+            patch) patch=$((patch + 1)) ;;
+          esac
+          next="$major.$minor.$patch"
+          if git rev-parse -q --verify "refs/tags/$next" >/dev/null; then
+            echo "Tag $next already exists - aborting." >&2
+            exit 1
+          fi
+          echo "Latest tag: $latest -> new tag: $next"
+          echo "next=$next" >> "$GITHUB_OUTPUT"
+
+  # Named after the version it pushes, e.g. "Push tag 2.1.0" - visible once
+  # you open the run and look at its job list.
+  tag:
+    needs: compute-version
+    name: Push tag ${{ needs.compute-version.outputs.next }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to push the new tag
+      actions: write   # Required to dispatch package.yml below
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v7
+
+      - name: Push tag
+        run: |
+          next="${{ needs.compute-version.outputs.next }}"
+          git tag "$next"
+          git push origin "$next"
+          echo "### Tagged $next :label:" >> "$GITHUB_STEP_SUMMARY"
+
+      # A push made with the default GITHUB_TOKEN (as above) does not
+      # trigger other workflows' `on: push`, so the tag push alone would
+      # never kick off package.yml. Dispatch it explicitly instead - that IS
+      # allowed with GITHUB_TOKEN - pointed at the tag we just pushed so it
+      # builds and publishes a release for it.
+      - name: Trigger package build for the new tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run package.yml --ref "${{ needs.compute-version.outputs.next }}"
