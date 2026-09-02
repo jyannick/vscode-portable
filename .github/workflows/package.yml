@@ -38,9 +38,14 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y xvfb
 
       # Some extensions defer downloading platform-specific runtime binaries
-      # until VS Code first activates them (e.g. CodeLLDB's native liblldb).
-      # We start VS Code once, give it 60 seconds to complete those downloads,
-      # then shut it down so those assets are included in the final archive.
+      # until VS Code first activates them (e.g. CodeLLDB's native liblldb,
+      # via install.ensurePlatformPackage in github.com/vadimcn/codelldb,
+      # which writes a "platform.ok" marker into the extension's own folder
+      # once its download finishes). We start VS Code once and poll for that
+      # marker instead of sleeping a fixed amount: finishes as soon as the
+      # download completes (usually well under 60s), and - unlike a fixed
+      # sleep - still catches it if a download ever takes longer, up to the
+      # 120s cap below, rather than silently shipping an incomplete runtime.
       #
       # This build is in "portable mode" (a data/ folder sits next to the
       # code binary - see https://code.visualstudio.com/docs/editor/portable),
@@ -68,8 +73,16 @@ jobs:
               . \
               > code-activation.log 2>&1 &
             CODE_PID=$!
-            # Give extensions time to download their runtime assets.
-            sleep 60
+            # Poll for any extension'"'"'s runtime-download marker ("*.ok",
+            # one directory under data/extensions - see the find command
+            # below) instead of a fixed sleep.
+            for i in $(seq 1 40); do
+              if compgen -G "Portable-VSCode-linux-x64/data/extensions/*/*.ok" > /dev/null; then
+                echo "Runtime download marker found after ~$((i * 3))s"
+                break
+              fi
+              sleep 3
+            done
             # The launcher above forks and detaches into its own Electron
             # process tree, so $CODE_PID has usually already exited by now;
             # kill everything tagged with our (portable-mode) user-data-dir
