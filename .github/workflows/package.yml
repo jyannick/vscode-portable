@@ -1,6 +1,15 @@
 name: Package
 run-name: Packaging of ${{ github.ref_name }} 📦
-on: [push]
+on:
+  push: {}
+  # Lets tag.yml explicitly dispatch this workflow against the tag it just
+  # pushed. A plain push wouldn't do it: pushes made with the default
+  # GITHUB_TOKEN (which tag.yml pushes the tag with) don't trigger other
+  # workflows' `on: push` - an explicit dispatch is exempt from that
+  # restriction. Dispatching with `ref: <tag>` makes github.ref inside this
+  # run equal refs/tags/<tag>, so the release-publish step below still
+  # fires exactly as it would from a real tag push.
+  workflow_dispatch: {}
 jobs:
   Prepare-Package:
     runs-on: ubuntu-latest
@@ -9,6 +18,9 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v7
+
+      - name: Report which ref is being packaged
+        run: echo "### Packaging \`${{ github.ref_name }}\` :package:" >> "$GITHUB_STEP_SUMMARY"
 
       # Downloads the latest stable VS Code tarball, unpacks it into
       # Portable-VSCode-linux-x64/, installs all extensions listed in
