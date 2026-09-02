@@ -8,7 +8,7 @@ jobs:
       contents: write  # Required to create GitHub Releases
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Downloads the latest stable VS Code tarball, unpacks it into
       # Portable-VSCode-linux-x64/, installs all extensions listed in
@@ -18,7 +18,7 @@ jobs:
       - name: Build portable package without archive
         run: |
           cd ${{ github.workspace }}
-          make all_but_package
+          make -f package.mk all_but_package
 
       # xvfb provides a virtual framebuffer so VS Code can start in the
       # headless GitHub Actions runner environment (no real display server).
@@ -26,25 +26,29 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y xvfb
 
       # Some extensions defer downloading platform-specific runtime binaries
-      # until VS Code first activates them (e.g. ms-vscode.cpptools, CodeLLDB).
+      # until VS Code first activates them (e.g. CodeLLDB's native liblldb).
       # We start VS Code once, give it 60 seconds to complete those downloads,
       # then shut it down so those assets are included in the final archive.
       #
-      # --user-data-dir  points to a throw-away directory so we don't pollute
-      #                  the portable data folder with ephemeral user state.
-      # --extensions-dir points to the portable extensions folder populated by
-      #                  "make install-extensions".
+      # This build is in "portable mode" (a data/ folder sits next to the
+      # code binary - see https://code.visualstudio.com/docs/editor/portable),
+      # which makes VS Code silently ignore --user-data-dir and always use
+      # Portable-VSCode-linux-x64/data/user-data instead. So rather than
+      # pointing at a throw-away directory (which would just be unused), we
+      # seed the settings VS Code actually reads from that real path:
+      # disabling Workspace Trust, since otherwise VS Code blocks on the
+      # trust prompt before the extension host (and thus any extension
+      # activation) ever starts, with no user here to click through it.
       - name: Start VS Code to download runtime assets
         run: |
           cd ${{ github.workspace }}
-          mkdir -p .vscode-user-data
+          mkdir -p Portable-VSCode-linux-x64/data/user-data/User
+          echo '{ "security.workspace.trust.enabled": false }' > Portable-VSCode-linux-x64/data/user-data/User/settings.json
           xvfb-run -a --server-args='-screen 0 1280x720x24' bash -c '
             # Run VS Code in the background so the script can continue to the
             # sleep and the kill. Without &, the script would hang here forever
             # and the CI runner would eventually kill it with SIGTERM (exit 143).
             Portable-VSCode-linux-x64/bin/code \
-              --user-data-dir "$PWD/.vscode-user-data" \
-              --extensions-dir "$PWD/Portable-VSCode-linux-x64/data/user-data/extensions" \
               --disable-gpu \
               --no-sandbox \
               --disable-crash-reporter \
@@ -54,16 +58,35 @@ jobs:
             CODE_PID=$!
             # Give extensions time to download their runtime assets.
             sleep 60
-            # Kill by PID, not by name pattern: pkill -f would also match this
-            # bash process (whose argv contains the path) and kill the wrapper.
+            # The launcher above forks and detaches into its own Electron
+            # process tree, so $CODE_PID has usually already exited by now;
+            # kill everything tagged with our (portable-mode) user-data-dir
+            # instead so downloads in flight are actually stopped before we zip.
             kill "$CODE_PID" 2>/dev/null || true
             wait "$CODE_PID" 2>/dev/null || true
+            pkill -f "user-data-dir=$PWD/Portable-VSCode-linux-x64/data/user-data" 2>/dev/null || true
           '
           # Log what was downloaded so warm-up results are visible in CI.
           echo "--- Runtime assets present after warm-up ---"
-          find Portable-VSCode-linux-x64/data/user-data/extensions \
+          find Portable-VSCode-linux-x64/data/extensions \
             \( -name "*.ok" -o -name "*.bin" -o -name "*.so" \) | sort || true
           cat code-activation.log || true
+
+      # Portable mode forced the warm-up run above to write its profile into
+      # Portable-VSCode-linux-x64/data/user-data (logs, caches, workspace
+      # storage for this CI checkout, the settings.json seeded above, ...).
+      # None of that is meant to ship: install.mk's install-release does
+      # "rmdir data/user-data/User" and replaces it with a symlink to the
+      # end user's own config directory, and rmdir only succeeds on an EMPTY
+      # directory - so a non-empty User here silently breaks that symlink
+      # step on every install. Reset user-data back to the pristine (absent)
+      # state "make unpack" leaves it in; only data/extensions (with its now-
+      # downloaded runtime assets) is meant to survive the warm-up.
+      - name: Reset build-time VS Code profile state
+        run: |
+          cd ${{ github.workspace }}
+          rm -rf Portable-VSCode-linux-x64/data/user-data
+          mkdir -p Portable-VSCode-linux-x64/data/user-data
 
       # Seal the final archive. --filesync ensures the zip exactly mirrors the
       # directory (removes stale entries, adds newly downloaded assets).
@@ -77,13 +100,13 @@ jobs:
           rm -f Portable-VSCode-linux-x64.zip
           zip --filesync -r Portable-VSCode-linux-x64.zip Portable-VSCode-linux-x64
 
-      # Publish a GitHub Release with the zip and install script as artifacts.
+      # Publish a GitHub Release with the zip as an artifact.
       # Only runs when the triggering ref is a version tag (e.g. v1.2.3).
       - name: Create new release for ${{ github.ref }} 🚀
         uses: ncipollo/release-action@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          artifacts: ${{ github.workspace }}/Portable-VSCode-linux-x64.zip, ${{ github.workspace }}/install.sh
+          artifacts: ${{ github.workspace }}/Portable-VSCode-linux-x64.zip
           bodyFile: "manifest.md"
 
       - run: echo "💡 This job's status is ${{ job.status }}."
